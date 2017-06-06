@@ -52,6 +52,7 @@ typedef struct
 //Date and time management
 const char_t *formatSystemTime(systime_t time, char_t *str);
 const char_t *formatDate(const DateTime *date, char_t *str);
+const char_t *htmlFormatDate(const DateTime *date, char_t *str);
 
 void getCurrentDate(DateTime *date);
 time_t getCurrentUnixTime(void);

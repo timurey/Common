@@ -127,6 +127,7 @@ error_t fsInit(void);
 
 bool_t fsFileExists(const char_t *path);
 error_t fsGetFileSize(const char_t *path, uint32_t *size);
+error_t fsGetFileModDate(const char_t *path, time_t *time);
 error_t fsRenameFile(const char_t *oldPath, const char_t *newPath);
 error_t fsDeleteFile(const char_t *path);
 

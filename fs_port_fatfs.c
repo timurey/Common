@@ -225,7 +225,66 @@ error_t fsGetFileSize(const char_t *path, uint32_t *size)
    //Successful processing
    return NO_ERROR;
 }
+/**
+ * @brief Retrieve the date of last modification of the specified file
+ * @param[in] path NULL-terminated string specifying the filename
+ * @param[out] time_t Date of modification of the file
+ * @return Error code
+ **/
 
+error_t fsGetFileModDate(const char_t *path, time_t *time)
+{
+	FRESULT res;
+	FILINFO fno;
+	DateTime date;
+	//Long filename support?
+#if (_USE_LFN != 0)
+	fno.lfname = NULL;
+	fno.lfsize = 0;
+#endif
+
+	//Check parameters
+	if(path == NULL || time == NULL)
+		return ERROR_INVALID_PARAMETER;
+
+#if (_FS_REENTRANT == 0)
+	//Enter critical section
+	osAcquireMutex(&fsMutex);
+#endif
+
+	//Retrieve information about the specified file
+	res = f_stat(path, &fno);
+
+#if (_FS_REENTRANT == 0)
+	//Leave critical section
+	osReleaseMutex(&fsMutex);
+#endif
+
+	//Any error to report?
+	if(res != FR_OK)
+		return ERROR_FAILURE;
+	//Valid file?
+	if(fno.fattrib & AM_DIR)
+		return ERROR_FAILURE;
+
+	//save the size of the file
+	date.day = (uint8_t)((fno.fdate)&0x001F);
+	date.month = (uint8_t)(((fno.fdate & 0x01E0)>>5)&0x000F);
+	date.year = (uint16_t)((fno.fdate & 0xFE00)>>9);
+
+	date.seconds=(uint8_t)((fno.ftime & 0x001F) << 1);
+	date.minutes=(uint8_t)(((fno.ftime & 0x07E0) >> 5)&0x003F);
+	date.hours=(uint8_t)(((fno.ftime & 0xF800) >> 11)&0x001F);
+
+	date.year +=1980;
+	date.milliseconds=0;
+	date.dayOfWeek=0;
+
+	*time=convertDateToUnixTime(&date);
+
+	//Successful processing
+	return NO_ERROR;
+}
 
 /**
  * @brief Rename the specified file
@@ -838,4 +897,28 @@ void fsCloseDir(FsDir *dir)
       //Leave critical section
       osReleaseMutex(&fsMutex);
    }
+}
+
+/**
+  * @brief  Gets Time from RTC
+  * @param  None
+  * @retval Time in DWORD
+  */
+DWORD fsGetFattime (void)
+{
+	DWORD res;
+	time_t	tmp;
+	DateTime time_fat;
+	tmp =getCurrentUnixTime();
+	convertUnixTimeToDate(tmp, &time_fat);
+
+
+	res =  (((DWORD)time_fat.year - 1980) << 25)
+					| ((DWORD)(time_fat.month) << 21)
+					| ((DWORD)time_fat.day << 16)
+					| (WORD)(time_fat.hours << 11)
+					| (WORD)(time_fat.minutes << 5)
+					| (WORD)(time_fat.seconds >> 1);
+
+	return res;
 }

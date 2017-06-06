@@ -33,6 +33,10 @@
    #include <time.h>
 #endif
 
+// defined in "rtc.c"
+extern RTC_HandleTypeDef RtcHandle;
+#include "stm32f2xx_hal_rtc.h"
+
 //Days
 static const char days[8][10] =
 {
@@ -64,6 +68,36 @@ static const char months[13][10] =
    "December"
 };
 
+//Days
+static const char htmlDays[8][4] =
+{
+   "",
+   "Mon",
+   "Tue",
+   "Wed",
+   "Thu",
+   "Fri",
+   "Sat",
+   "Sun"
+};
+
+//Months
+static const char htmlMonths[13][4] =
+{
+   "",
+   "Jan",
+   "Feb",
+   "Mar",
+   "Apr",
+   "May",
+   "Jun",
+   "Jul",
+   "Aug",
+   "Sep",
+   "Oct",
+   "Nov",
+   "Dec"
+};
 
 /**
  * @brief Format system time
@@ -154,7 +188,30 @@ const char_t *formatDate(const DateTime *date, char_t *str)
    return str;
 }
 
+/**
+ * @brief Format date in HTML format
+ * @param[in] date Pointer to a structure representing the date
+ * @param[out] str NULL-terminated string representing the specified date
+ * @return Pointer to the formatted string
+ **/
 
+const char_t *htmlFormatDate(const DateTime *date, char_t *str)
+{
+   static char_t buffer[40];
+
+   //The str parameter is optional
+   if(!str) str = buffer;
+
+   //Format date
+   if(date->dayOfWeek)
+   {
+      sprintf(str, "%s %s %" PRIu8 " %" PRIu16 " %02" PRIu8 ":%02" PRIu8 ":%02" PRIu8,
+         htmlDays[MIN(date->dayOfWeek, 7)], htmlMonths[MIN(date->month, 12)], date->day,
+         date->year, date->hours, date->minutes, date->seconds);
+   }
+   //Return a pointer to the formatted string
+   return str;
+}
 /**
  * @brief Get current date and time
  * @param[out] date Pointer to a structure representing the date and time
@@ -181,8 +238,22 @@ time_t getCurrentUnixTime(void)
    //Retrieve current time
    return time(NULL);
 #else
-   //Not implemented
-   return 0;
+   DateTime date;
+   RTC_DateTypeDef sdatestructureget;
+   RTC_TimeTypeDef stimestructureget;
+
+   /* Get the RTC current Time */
+   HAL_RTC_GetTime(&RtcHandle, &stimestructureget, FORMAT_BIN);
+   /* Get the RTC current Date */
+   HAL_RTC_GetDate(&RtcHandle, &sdatestructureget, FORMAT_BIN);
+   date.year=sdatestructureget.Year+2000;
+   date.month=sdatestructureget.Month;
+   date.day=sdatestructureget.Date;
+   date.dayOfWeek=sdatestructureget.WeekDay;
+   date.hours=stimestructureget.Hours;
+   date.minutes=stimestructureget.Minutes;
+   date.seconds=stimestructureget.Seconds;
+   return convertDateToUnixTime(&date);
 #endif
 }
 

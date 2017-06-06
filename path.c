@@ -356,6 +356,38 @@ void pathCombine(char_t *path, const char_t *more, size_t maxLen)
    }
 }
 
+/**
+ * @brief Concatenate paths and extention
+ * @param[in,out] path NULL-terminated string containing the path
+ * @param[in] extention NULL-terminated string containing the extention
+ * @param[in] maxLen Maximum pathname length
+ **/
+
+void pathAddExtention(char_t *path, const char_t *extention, size_t maxLen)
+{
+   size_t n1;
+   size_t n2;
+
+
+   //Skip any slash character at the beginning of the second path
+   while(*extention == '/' || *extention == '\\') extention++;
+
+   //Retrieve the length of the first path
+   n1 = strlen(path);
+   //Retrieve the length of second path
+   n2 = strlen(extention);
+
+   //Check the length of the resulting string
+   if(n1 < maxLen)
+   {
+      //Limit the number of characters to be copied
+      n2 = MIN(n2, maxLen - n1);
+      //Concatenate the resulting string
+      strncpy(path + n1, extention, n2);
+      //Properly terminate the string with a NULL character
+      path[n1 + n2] = '\0';
+   }
+}
 
 /**
  * @brief Check whether a file name matches the specified pattern
