@@ -34,8 +34,8 @@
 #endif
 
 // defined in "rtc.c"
-extern RTC_HandleTypeDef RtcHandle;
 #include "stm32f2xx_hal_rtc.h"
+extern RTC_HandleTypeDef RtcHandle;
 
 //Days
 static const char days[8][10] =
