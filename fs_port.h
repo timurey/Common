@@ -144,5 +144,5 @@ error_t fsRemoveDir(const char_t *path);
 FsDir *fsOpenDir(const char_t *path);
 error_t fsReadDir(FsDir *dir, FsDirEntry *dirEntry);
 void fsCloseDir(FsDir *dir);
-
+unsigned long fsGetFattime(void);
 #endif

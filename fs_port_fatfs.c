@@ -904,7 +904,7 @@ void fsCloseDir(FsDir *dir)
   * @param  None
   * @retval Time in DWORD
   */
-DWORD fsGetFattime (void)
+DWORD fsGetFattime(void)
 {
 	DWORD res;
 	time_t	tmp;
