@@ -35,7 +35,7 @@
 
 // defined in "rtc.c"
 #include "stm32f2xx_hal_rtc.h"
-extern RTC_HandleTypeDef RtcHandle;
+extern RTC_HandleTypeDef hrtc;
 
 //Days
 static const char days[8][10] =
@@ -243,9 +243,9 @@ time_t getCurrentUnixTime(void)
    RTC_TimeTypeDef stimestructureget;
 
    /* Get the RTC current Time */
-   HAL_RTC_GetTime(&RtcHandle, &stimestructureget, FORMAT_BIN);
+   HAL_RTC_GetTime(&hrtc, &stimestructureget, FORMAT_BIN);
    /* Get the RTC current Date */
-   HAL_RTC_GetDate(&RtcHandle, &sdatestructureget, FORMAT_BIN);
+   HAL_RTC_GetDate(&hrtc, &sdatestructureget, FORMAT_BIN);
    date.year=sdatestructureget.Year+2000;
    date.month=sdatestructureget.Month;
    date.day=sdatestructureget.Date;
